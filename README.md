@@ -12,7 +12,7 @@
 ## 🛠️ الأدوات المستخدمة (Tech Stack)
 * **Framework:** [Flutter](https://flutter.dev)
 * **Backend API:** PHP / MySQL 
-* **State Management:** SetState (جاري التطوير لـ Cubit 🚀)
+* **State Management:** cubit
 * **Storage:** SharedPreferences
 * **UI Libraries:** Awesome Dialog, Intl, Gap  cupertino_icons,lottie,intl,percent_indicator,awesome_dialog,shared_preferences ,flutter_bloc
 
