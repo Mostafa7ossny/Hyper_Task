@@ -1,74 +1,29 @@
 import 'package:flutter/material.dart';
 
 class TaskModel {
+  final int id;
   final String titletask;
   final String descriptiontask;
-  final String timetask;
-  final String categorytask; // مثلاً Work أو Health
+  final dynamic? start;
+  final dynamic? end;
+  final String categorytask;
 
   TaskModel({
+    required this.id,
     required this.titletask,
     required this.descriptiontask,
-    required this.timetask,
+    required this.start,
+    required this.end,
     required this.categorytask,
   });
+  factory TaskModel.fromJson(Map<String, dynamic> json) {
+    return TaskModel(
+      id: int.parse(json['id'].toString()),
+      titletask: json['title'],
+      descriptiontask: json['description'],
+      categorytask: json['type'],
+      start: json['start_date'],
+      end: json['end_date'],
+    );
+  }
 }
-
-List<TaskModel> tasksList = [
-  TaskModel(
-    titletask: "Design Review",
-    descriptiontask: "Sync with the UI team about the new flow.",
-    timetask: "10:00 AM",
-    categorytask: "WORK",
-  ),
-  TaskModel(
-    titletask: "Yoga Session",
-    descriptiontask: "Morning flow at the local studio.",
-    timetask: "07:30 AM",
-    categorytask: "HEALTH",
-  ),
-  TaskModel(
-    titletask: "Project Meeting",
-    descriptiontask: "Discuss the milestones with the client.",
-    timetask: "02:00 PM",
-    categorytask: "WORK",
-  ),
-  TaskModel(
-    titletask: "Project Meeting",
-    descriptiontask: "Discuss the milestones with the client.",
-    timetask: "02:00 PM",
-    categorytask: "WORK",
-  ),
-  TaskModel(
-    titletask: "Project Meeting",
-    descriptiontask: "Discuss the milestones with the client.",
-    timetask: "02:00 PM",
-    categorytask: "WORK",
-  ),
-];
-
-class InProgresstask {
-  final String title;
-  final String category;
-  final IconData icon;
-
-  InProgresstask({
-    required this.title,
-    required this.category,
-    required this.icon,
-  });
-}
-
-List<InProgresstask> myprogreesTasks = [
-  InProgresstask(
-    title: "Gym Workout",
-    category: "Health",
-    icon: Icons.fitness_center,
-  ),
-  InProgresstask(title: "Flutter Coding", category: "Work", icon: Icons.code),
-  InProgresstask(
-    title: "Buy Groceries",
-    category: "Personal",
-    icon: Icons.shopping_cart,
-  ),
-];

@@ -1,39 +1,34 @@
+import 'dart:ffi';
+
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 
-class Textfieldwid extends StatefulWidget {
-  const Textfieldwid({
+class Textfieldtask extends StatelessWidget {
+  const Textfieldtask({
     super.key,
     required this.hintText,
     this.keyboardType,
-    required this.uppertitle,
-    required this.mycontroller,
     this.perfixicon,
     this.sufixicon,
     this.colorupper,
+    this.hintcolor,
     this.valid,
     required this.upperfontsize,
-    this.hintcolor,
-    required this.obscureText,
+    required this.uppertitle,
+    required this.mycontroller,
+    required this.lines,
   });
   final String hintText;
   final dynamic keyboardType;
-  final bool obscureText;
   final dynamic perfixicon;
   final dynamic sufixicon;
   final dynamic colorupper;
   final dynamic hintcolor;
   final String? Function(String?)? valid;
   final double upperfontsize;
+  final int lines;
   final String uppertitle;
   final TextEditingController mycontroller;
-
-  @override
-  State<Textfieldwid> createState() => _TextfieldwidState();
-}
-
-class _TextfieldwidState extends State<Textfieldwid> {
-  bool isHidden = false;
   @override
   Widget build(BuildContext context) {
     final double screenWidth = MediaQuery.sizeOf(context).width;
@@ -44,52 +39,44 @@ class _TextfieldwidState extends State<Textfieldwid> {
 
       children: [
         Container(
-          padding: EdgeInsets.only(left: screenWidth * .04),
+          padding: EdgeInsets.only(left: screenWidth * .02),
           child: Text(
-            widget.uppertitle,
+            uppertitle,
             style: TextStyle(
-              fontSize: widget.upperfontsize,
-              color: widget.colorupper,
+              fontSize: upperfontsize,
+              color: colorupper,
               fontWeight: FontWeight.w700,
             ),
           ),
         ),
 
         Gap(screenHeight * .003),
-        Container(
-          height: screenHeight * .07,
+        SizedBox(
           width: screenWidth * .9,
           child: TextFormField(
-            obscureText: isHidden,
-            keyboardType: widget.keyboardType,
-            controller: widget.mycontroller,
-            validator: widget.valid,
+            maxLines: lines,
+            keyboardType: keyboardType,
+            controller: mycontroller,
+            validator: valid,
             decoration: InputDecoration(
-              prefixIcon: widget.perfixicon,
-
-              suffixIcon: widget.uppertitle.contains("PASSWORD")
-                  ? IconButton(
-                      icon: Icon(
-                        isHidden ? Icons.visibility_off : Icons.visibility,
-                      ),
-                      onPressed: () {
-                        // 4. السطر ده هو اللي بيخلي العين
-                        // تشتغل
-                        setState(() {
-                          isHidden = !isHidden;
-                        });
-                      },
-                    )
-                  : widget.sufixicon,
-              hintText: widget.hintText,
+              prefixIcon: perfixicon,
+              suffixIcon: sufixicon,
+              hintText: hintText,
               hintStyle: TextStyle(
                 fontSize: screenWidth * .04,
-                color: widget.hintcolor,
-                fontWeight: FontWeight.w200,
+                color: hintcolor,
+                fontWeight: FontWeight.w600,
               ),
               enabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(15),
-                borderSide: BorderSide(color: Color.fromARGB(0, 49, 51, 53)),
+                borderSide: BorderSide(
+                  color: const Color.fromARGB(
+                    255,
+                    0,
+                    116,
+                    212,
+                  ).withOpacity(0.5),
+                  width: 1.5,),
               ),
 
               focusedBorder: OutlineInputBorder(
@@ -111,5 +98,6 @@ class _TextfieldwidState extends State<Textfieldwid> {
         ),
       ],
     );
+    ;
   }
 }

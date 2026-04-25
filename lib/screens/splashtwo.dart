@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
-import 'package:hyper_task/constant/Names.dart';
-import 'package:hyper_task/screens/auth/login.dart';
-import 'package:hyper_task/screens/auth/signup.dart';
-import 'package:hyper_task/widgets/custombutton.dart';
+import '../constant/Names.dart';
+import 'auth/login.dart';
+import 'auth/signup.dart';
+import '../widgets/custombutton.dart';
 
 class Splashtwo extends StatefulWidget {
   const Splashtwo({super.key});

@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 
 class Cuslistbutton extends StatefulWidget {
-  const Cuslistbutton({super.key, required this.custext});
+  const Cuslistbutton({super.key, required this.custext, this.color});
   final String custext;
-
+final dynamic color;
   @override
   State<Cuslistbutton> createState() => _CuslistbuttonState();
 }
@@ -20,7 +20,7 @@ class _CuslistbuttonState extends State<Cuslistbutton> {
       height: screenHeight * .05,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(20),
-        color: const Color.fromARGB(255, 53, 53, 53),
+        color: widget.color,
       ),
       child: Text(
         widget.custext,

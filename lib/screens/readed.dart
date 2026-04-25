@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
-import 'package:hyper_task/constant/Names.dart';
-import 'package:hyper_task/widgets/inprogresstask.dart';
+import '../constant/Names.dart';
+import '../widgets/inprogresstask.dart';
 import 'package:intl/intl.dart';
 
 class Readed extends StatefulWidget {
@@ -177,7 +177,7 @@ class _ReadedState extends State<Readed> {
               ),
             ],
           ),
-          Inprogresstask()
+          // Inprogresstask()
         ],
       ),
     );

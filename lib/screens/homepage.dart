@@ -1,13 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gap/gap.dart';
-import 'package:hyper_task/constant/Names.dart';
-import 'package:hyper_task/constant/taskmodel.dart';
-import 'package:hyper_task/main.dart';
+import 'package:hyper_task/screens/setting.dart';
+import '../constant/taskmodel.dart';
+import '../cubit/screens/task/task_service_cubit.dart';
+import '../widgets/taskcard.dart';
+import '../constant/Names.dart';
+import 'add_task.dart';
+import '../functions/crud.dart';
+import '../main.dart';
+import 'splashtwo.dart';
+import '../widgets/BottomNavigationBar.dart';
+import '../widgets/category.dart';
 
-import 'package:hyper_task/widgets/BottomNavigationBar.dart';
-import 'package:hyper_task/widgets/cuslistbutton.dart';
-import 'package:hyper_task/widgets/sqldb.dart';
-import 'package:hyper_task/widgets/taskcard.dart';
 import 'package:intl/intl.dart';
 import 'package:percent_indicator/circular_percent_indicator.dart';
 
@@ -19,36 +24,33 @@ class Homepage extends StatefulWidget {
 }
 
 class _HomepageState extends State<Homepage> {
+  double cardOpacity = 0.0;
+  double cardBottomPosition = 120.0;
+  bool showCard = true;
+  int selectedIndex = 0;
+  @override
+  void initState() {
+    context.read<TaskServiceCubit>().gettasks();
 
-void initState() {
     super.initState();
-    // --- 2. هنا بنشغل الأنميشن أول ما الصفحة تفتح ---
     Future.delayed(const Duration(milliseconds: 300), () {
       if (mounted) {
         setState(() {
-          _cardOpacity = 1.0; // بيظهر
-          _cardBottomPosition = 150.0; // بيطلع لمكانه الطبيعي
+          cardOpacity = 1.0;
+          cardBottomPosition = 150.0;
         });
       }
     });
   }
-  
-  double _cardOpacity = 0.0;
-  double _cardBottomPosition = 120.0;
-  bool showCard = true;
-  int selectedIndex = 0;
 
   @override
   Widget build(BuildContext context) {
-
-    String? usernameapp = sharedpref.getString("username") ?? "User";
-    SqlDb sqlDb = SqlDb();
     String todayDate = DateFormat('EEEE, d MMM').format(DateTime.now());
     final double screenWidth = MediaQuery.sizeOf(context).width;
-
     final double screenHeight = MediaQuery.sizeOf(context).height;
     return Scaffold(
       backgroundColor: Colors.white,
+
       appBar: AppBar(
         backgroundColor: Colors.white,
         automaticallyImplyLeading: false,
@@ -75,15 +77,24 @@ void initState() {
           ),
           Gap(screenWidth * .43),
 
-          Image.asset(
-            "assets/icons/setting.png",
-            width: screenWidth * .06,
-            color: const Color.fromARGB(187, 122, 122, 122),
+          InkWell(
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => SettingsScreen()),
+              );
+            },
+            child: Image.asset(
+              "assets/icons/setting.png",
+              width: screenWidth * .06,
+              color: const Color.fromARGB(187, 122, 122, 122),
+            ),
           ),
           Gap(screenWidth * .04),
         ],
       ),
       body: Stack(
+        fit: StackFit.expand,
         children: [
           SingleChildScrollView(
             child: Column(
@@ -134,24 +145,13 @@ void initState() {
                     ),
                   ],
                 ),
-                Gap(screenHeight * .07),
+                Gap(screenHeight * .065),
 
-                SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  child: Row(
-                    children: [
-                      Gap(screenWidth * .05),
-
-                      Cuslistbutton(custext: "All"),
-                      Gap(screenWidth * .04),
-                      Cuslistbutton(custext: "Work"),
-                      Gap(screenWidth * .04),
-                      Cuslistbutton(custext: "Personal"),
-                      Gap(screenWidth * .04),
-                      Cuslistbutton(custext: "Health"),
-                    ],
-                  ),
+                Container(
+                  padding: EdgeInsets.only(left: screenWidth * .03),
+                  child: Category(),
                 ),
+
                 Gap(screenHeight * .04),
                 Row(
                   children: [
@@ -176,47 +176,71 @@ void initState() {
                   ],
                 ),
                 Gap(screenHeight * .04),
-                ListView.separated(
-                  shrinkWrap: true,
-                  physics: NeverScrollableScrollPhysics(),
-                  itemCount: tasksList.length,
+                BlocBuilder<TaskServiceCubit, TaskServiceState>(
+                  builder: (context, state) {
+                    if (state is TaskServiceLoading) {
+                      return Center(child: CircularProgressIndicator());
+                    } else if (state is TaskServiceloded) {
+                      return ListView.builder(
+                        key: UniqueKey(),
+                        shrinkWrap: true,
+                        physics: NeverScrollableScrollPhysics(),
+                        itemCount: state.tasks.length,
+                        itemBuilder: (context, index) {
+                          var task = state.tasks[index];
 
-                  separatorBuilder: (context, index) {
-                    return const SizedBox(height: 16);
-                  },
-                  itemBuilder: (context, index) {
-                    return Taskcard(task: tasksList[index]);
+                          return Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 8),
+                            child: Taskcard(task: task),
+                          );
+                        },
+                      );
+                    }
+                    return Center(child: Text("No Tasks"));
                   },
                 ),
+                Gap(screenHeight * .1),
               ],
             ),
           ),
           Positioned(
-            bottom: screenHeight * .15,
-            right: screenWidth * .07, // بنخليه على اليمين
+            bottom: screenHeight * .04,
+            left: screenWidth * .05,
+            child: CustomFloatingNavBar(
+              currentIndex: selectedIndex,
+              onTap: (value) {
+                setState(() {
+                  selectedIndex = value;
+                });
+                print("انت دوست على الأيقونة رقم: $value");
+              },
+            ),
+          ),
+
+          Positioned(
+            bottom: screenHeight * .14,
+            right: screenWidth * .07,
             child: InkWell(
               onTap: () async {
-                int response = await sqlDb.insertData(
-                  "INSERT INTO 'Tasksdb' ('tasks') VALUES ('task one')",
+                var result = await Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => AddTaskScreen()),
                 );
-                print(response);
+                if (result == true) {
+                  context.read<TaskServiceCubit>().gettasks();
+                }
               },
               child: Container(
-                width: 56, // مقاس الـ Floating Button الافتراضي
+                width: 56,
                 height: 56,
-                // شكل الزر
                 decoration: const BoxDecoration(
                   shape: BoxShape.circle,
                   gradient: LinearGradient(
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
-                    colors: [
-                      Color(0xff4357D2), // أزرق أفتح
-                      Color(0xff2A3EB2), // أزرق أغمق
-                    ],
+                    colors: [Color(0xff4357D2), Color(0xff2A3EB2)],
                   ),
                 ),
-                // محتوى الزر
                 child: const Icon(Icons.add, color: Colors.white, size: 32),
               ),
             ),
@@ -226,11 +250,11 @@ void initState() {
             AnimatedPositioned(
               duration: const Duration(milliseconds: 1000),
               curve: Curves.easeInOutCubicEmphasized,
-              bottom: screenHeight * .12,
+              bottom: screenHeight * .15,
               left: screenWidth * .06,
               child: AnimatedOpacity(
                 duration: const Duration(milliseconds: 1500),
-                opacity: _cardOpacity,
+                opacity: cardOpacity,
                 child: Dismissible(
                   key: UniqueKey(),
                   direction: DismissDirection.horizontal,
@@ -240,80 +264,57 @@ void initState() {
                     });
                   },
                   child: Stack(
-                    // بنخلي الـ Floating Button يطلع بره حدود الكارت
                     clipBehavior: Clip.none,
                     children: [
-                      // 1. الـ Container الرئيسي (الكارت البنفسجي)
                       Container(
                         width: screenWidth * 0.88,
                         padding: const EdgeInsets.all(24.0),
-                        // هنا بنعمل الشكل واللون والخلفية
                         decoration: BoxDecoration(
-                          // حواف دائرية كبيرة زي التصميم
                           borderRadius: BorderRadius.circular(32),
-                          // التدرج اللوني (Gradient)
                           gradient: const LinearGradient(
-                            begin: Alignment.bottomRight, // البداية من تحت يمين
-                            end: Alignment.topLeft, // النهاية فوق شمال
+                            begin: Alignment.bottomRight,
+                            end: Alignment.topLeft,
                             colors: [
-                              Color.fromARGB(255, 75, 46, 136), // بنفسجي غامق تحت
-                              Color.fromARGB(
-                                255,
-                                179,
-                                154,
-                                226,
-                              ), // بنفسجي أفتح فوق
+                              Color.fromARGB(255, 75, 46, 136),
+                              Color.fromARGB(255, 179, 154, 226),
                             ],
                           ),
-                
-                          // هنا بنحط النقشة المثلثية كصورة خلفية
-                          // تأكد إنك ضفت الصورة في الـ assets وعملتلها تعريف في yaml
                         ),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
-                          // بنخلي الـ Column ياخد طول المحتوى بس
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            // 2. العنوان
                             Text(
                               "Daily $appname",
                               style: TextStyle(
                                 color: Colors.white,
-                                fontSize: screenWidth * 0.05, // حجم متجاوب
+                                fontSize: screenWidth * 0.05,
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
                             const SizedBox(height: 12),
-                            // 3. الاقتباس
                             Text(
                               "“One step at a time is enough for me.”",
                               style: TextStyle(
-                                color: Colors.white.withOpacity(
-                                  0.9,
-                                ), // شفافية خفيفة للكلام
-                                fontSize: screenWidth * 0.04, // حجم متجاوب
+                                color: Colors.white.withOpacity(0.9),
+                                fontSize: screenWidth * 0.04,
                                 fontWeight: FontWeight.w300,
                                 fontStyle: FontStyle.italic,
                               ),
                             ),
                             SizedBox(height: screenHeight * .02),
-                            // 4. زرار "READ MORE"
                             SizedBox(
                               width: screenWidth * .3,
                               height: screenHeight * .04,
                               child: ElevatedButton(
                                 onPressed: () {},
                                 style: ElevatedButton.styleFrom(
-                                  backgroundColor: Colors.white, // لون الزر أبيض
-                                  foregroundColor: const Color(
-                                    0xff864CFF,
-                                  ), // لون الكتابة بنفسجي
-                                  // مسافات داخلية
+                                  backgroundColor: Colors.white,
+                                  foregroundColor: const Color(0xff864CFF),
                                   padding: const EdgeInsets.symmetric(
                                     horizontal: 10,
                                     vertical: 8,
                                   ),
-                                  // حواف دائرية كبيرة للزر
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(30),
                                   ),
@@ -323,7 +324,7 @@ void initState() {
                                   style: TextStyle(
                                     fontSize: 11,
                                     fontWeight: FontWeight.w800,
-                                    letterSpacing: 1.2, // تباعد بين الحروف
+                                    letterSpacing: 1.2,
                                   ),
                                 ),
                               ),
@@ -331,27 +332,11 @@ void initState() {
                           ],
                         ),
                       ),
-                
-                      // 5. زر الإضافة (Floating Action Button) المتموضع
-                      // بنستخدم Positioned عشان نحدد مكانه بالظبط
                     ],
                   ),
                 ),
               ),
             ),
-
-          Positioned(
-            bottom: screenHeight * .02,
-            left: screenWidth * .05,
-            child: CustomFloatingNavBar(
-              currentIndex: selectedIndex, // متغير لحفظ الـ Index الحالي
-              onTap: (index) {
-                setState(() {
-                  selectedIndex = index; // حدث الـ Index لما تدوس
-                });
-              },
-            ),
-          ),
         ],
       ),
     );

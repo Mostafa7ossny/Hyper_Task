@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:hyper_task/screens/auth/login.dart';
-import 'package:hyper_task/screens/auth/signup.dart';
-import 'package:hyper_task/screens/homepage.dart';
-import 'package:hyper_task/screens/readed.dart';
-import 'package:hyper_task/screens/splashtwo.dart';
-import 'package:hyper_task/widgets/BottomNavigationBar.dart';
+import '../screens/auth/login.dart';
+import '../screens/auth/signup.dart';
+import '../screens/homepage.dart';
+import '../screens/readed.dart';
+import 'BottomNavigationBar.dart';
 
 class Screenbuttom extends StatefulWidget {
   const Screenbuttom({super.key});

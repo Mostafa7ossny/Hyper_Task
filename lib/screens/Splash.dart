@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:hyper_task/screens/splashtwo.dart';
+import 'splashtwo.dart';
 import 'package:lottie/lottie.dart';
 
 class Splash extends StatefulWidget {
